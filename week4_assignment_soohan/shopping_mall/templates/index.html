@@ -76,6 +76,7 @@
             if (response["result"] == "success") {
               const orderResponse = response["order"];
               const order = makeOrderRow(orderResponse);
+              alert("주문이 성공적으로 완료되었습니다.")
               $("#orders-box").append(order);
               $("#order-name").val("");
               $("#order-count").val("");
