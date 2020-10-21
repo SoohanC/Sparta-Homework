@@ -22,8 +22,9 @@ def save_order():
     address_receive=request.form['address']
     phone_receive=request.form['phone']
     db_data = {"name":name_receive,"count":count_receive,"address":address_receive,"phone":phone_receive}
-    db.shopping_mall.insert_one(db_data)
-    return jsonify({'result': 'success'})
+    db.shopping_mall.insert_one(db_data) #여기서 db_data에 objectID 가 들어가져버림
+    order_data = {"name":name_receive,"count":count_receive,"address":address_receive,"phone":phone_receive}
+    return jsonify({'result': 'success', 'order': order_data})
 
 # 주문 목록보기(Read) API
 @app.route('/order', methods=['GET'])
