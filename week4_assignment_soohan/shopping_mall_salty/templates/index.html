@@ -16,7 +16,32 @@
             integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
             crossorigin="anonymous"
     />
+    <title>돈 상점</title>
     <style>
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes emojiVibe {
+            0% {transform: scale(1);}
+            10% {transform: scale(1.2);}
+            20% {transform: scale(0.8);}
+            30% {transform: scale(1.2);}
+            40% {transform: scale(0.8); transform: rotate(0deg);}
+            50% {transform: scale(1.2); transform: rotate(360deg);}
+            60% {transform: scale(0.8);}
+            70% {transform: scale(1.2);}
+            80% {transform: scale(0.8);}
+            90% {transform: scale(1.2);}
+            100% {transform: scale(1);}
+        }
+
         body {
             background-color: #222f3e;
             font-family: 'Nanum Gothic', sans-serif;
@@ -97,26 +122,47 @@
             width: 49%;
         }
 
+        .result_container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .order-placed {
-            margin: 100px auto;
+            margin: 20px auto 100px auto;
             font-size: 30px;
             font-weight: bold;
             text-align: center;
-
+            animation: fadeIn 0.4s ease-in;
         }
-        .foreign_currency{
-            display:flex;
+
+        .complete_emoji {
+            margin-top: 50px;
+            font-size: 50px;
+            animation: emojiVibe 3s ease-in-out;
+        }
+
+        .foreign_currency {
+            display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
-        .exchange-rate{
+
+        .exchange-rate {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             margin: 20px 0px;
         }
+
+        .table_container .table_label {
+            font-size: 36px;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
     </style>
-    <title>돈 상점</title>
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script
             src="https://code.jquery.com/jquery-3.5.1.min.js"
@@ -133,7 +179,10 @@
             crossorigin="anonymous"
     ></script>
     <script>
-        $(document).ready(getExchangeRate());
+        $(document).ready(function () {
+            getExchangeRate()
+            getOrder()
+        });
 
         function getExchangeRate() {
             $.ajax({
@@ -142,8 +191,8 @@
                 success: function (res) {
                     let usdExRate = res[1]["rate"];
                     let jpyExRate = res[2]["rate"];
-                    let usdRateElement =`<span class="ex_rate">🇰🇷-🇺🇸 환율 : ${usdExRate.toFixed(2)} / 달러</span>`
-                    let jpyRateElement =`<span class="ex_rate">🇰🇷-🇯🇵 환율 : ${jpyExRate.toFixed(2)} / 엔</span>`
+                    let usdRateElement = `<span class="ex_rate">🇰🇷-🇺🇸 환율 : ${usdExRate.toFixed(2)} / 달러</span>`
+                    let jpyRateElement = `<span class="ex_rate">🇰🇷-🇯🇵 환율 : ${jpyExRate.toFixed(2)} / 엔</span>`
                     $(`#jsExchangeRate`).append(usdRateElement);
                     $(`#jsExchangeRate`).append(jpyRateElement);
 
@@ -167,46 +216,83 @@
             let alertMessage = "정보를 입력해 주세요.";
             let orderStatus = false;
             //
-            if (quantity.match(/^[0-9]+$/)) {
-                if (name.match(/^[가-힇]+$/)) {
-                    if (address !== "") {
-                        if (phoneNumber.match(/^01(?:0|1|[6-9])-(?:\d{3}|\d{4})-\d{4}$/)) {
-                            if (creditCard.match(/^\d{4}-\d{4}-\d{4}-\d{4}$/)) {
-                                if (expirationDate.match(/^\d{2}-\d{2}$/)) {
-                                    if (CVC.match(/^\d{3}$/)) {
-                                        alertMessage = "주문이 완료 되었습니다."
-                                        orderStatus = true;
-                                    } else {
-                                        alertMessage = "CVC는 세자리 숫자로 입력해주세요"
-                                    }
-                                } else {
-                                    alertMessage = "만료일은 MM-YY 형태의 숫자로 입력해주세요."
-                                }
-                            } else {
-                                alertMessage = "신용카드 번호는 xxxx-xxxx-xxxx-xxxx 형태의 숫자로 입력해주세요"
-                            }
-                        } else {
-                            alertMessage = "전화번호는 010-xxxx-xxxx 형태로 입력해 주세요"
-                        }
-                    } else {
-                        alertMessage = "주소를 입력해주세요."
-                    }
-                } else {
-                    alertMessage = "이름을 한글로 입력해 주세요."
-                }
-            } else {
+            if (!quantity.match(/^[0-9]+$/)) {
                 alertMessage = "수량 숫자로 입력해 주세요."
+            } else if (!name.match(/^[가-힇]+$/)) {
+                alertMessage = "이름을 한글로 입력해 주세요."
+            } else if (address === "") {
+                alertMessage = "주소를 입력해주세요."
+            } else if (!phoneNumber.match(/^01(?:0|1|[6-9])-(?:\d{3}|\d{4})-\d{4}$/)) {
+                alertMessage = "전화번호는 010-xxxx-xxxx 형태로 입력해 주세요"
+            } else if (!creditCard.match(/^\d{4}-\d{4}-\d{4}-\d{4}$/)) {
+                alertMessage = "신용카드 번호는 xxxx-xxxx-xxxx-xxxx 형태의 숫자로 입력해주세요"
+            } else if (!expirationDate.match(/^\d{2}-\d{2}$/)) {
+                alertMessage = "만료일은 MM-YY 형태의 숫자로 입력해주세요."
+            } else if (!CVC.match(/^\d{3}$/)) {
+                alertMessage = "CVC는 세자리 숫자로 입력해주세요"
+            } else {
+                alertMessage = "주문이 완료 되었습니다."
+                orderStatus = true;
             }
-            //주문완료 후 처리
             alert(alertMessage);
             if (orderStatus) {
+                const order = {
+                    quantity, name, address, phoneNumber, creditCard, expirationDate, CVC
+                }
+                postOrder(order)
                 $('#order-info').empty();
-                const orderPlaced = `<div class="order-placed">주문이 정상적으로 완료 되었습니다.</div>`
+                const orderPlaced = `<div class="result_container"><div class="complete_emoji">🤑</div><div class="order-placed">주문이 정상적으로 완료 되었습니다.</div></div>`
                 $('#order-info').append(orderPlaced);
+                setTimeout(function (){
+                    location.reload()
+                },3500)
             }
 
-
         }
+
+        function postOrder(order) {
+            $.ajax({
+                type: "POST",
+                url: "/api/order",
+                data: {...order},
+                success: function (response) {
+                    if (response.result === "success") {
+                        console.log(response.order)
+                    }
+                }
+            })
+        }
+
+        function createTd(order, index) {
+            const row = ` <tr>
+                <th scope="row" class="order_item">${index + 1}</th>
+                <td>${order.name}</td>
+                <td>${order.quantity}</td>
+                <td>${order.address}</td>
+                <td>${order.phoneNum}</td>
+            </tr>`
+            return row;
+        }
+
+
+        function getOrder() {
+            $.ajax({
+                type: "GET",
+                url: "/api/order",
+                data: {},
+                success: function (response) {
+                    if (response.result === "success") {
+                        let orders = response.orders;
+                        orders.sort((a, b) => b.quantity - a.quantity)
+                        for (let i = 0; i < orders.length; i++) {
+                            const order = createTd(orders[i], i);
+                            $('#order_list').append(order)
+                        }
+                    }
+                }
+            })
+        }
+
 
         function cancel() {
             alert("오류가 발생하였습니다.");
@@ -423,6 +509,22 @@
                 </button>
             </div>
         </div>
+    </div>
+    <div class="table_container">
+        <div class="table_label">호구 list</div>
+        <table class="table table-dark">
+            <thead>
+            <tr>
+                <th scope="col">순위</th>
+                <th scope="col">이름</th>
+                <th scope="col">수량</th>
+                <th scope="col">주소</th>
+                <th scope="col">전화번호</th>
+            </tr>
+            </thead>
+            <tbody id="order_list">
+            </tbody>
+        </table>
     </div>
 </div>
 
